@@ -4,6 +4,7 @@
 <title>Example of Speech Recognition</title>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 <script>
+    var lastText = null;
     var final_transcript = '';
     var recognizing = false;
     var ignore_onend;
@@ -46,16 +47,6 @@
                 return;
             }
             showInfo('');
-            if (window.getSelection) {
-                window.getSelection().removeAllRanges();
-                var range = document.createRange();
-                range.selectNode(document.getElementById('final_span'));
-                window.getSelection().addRange(range);
-            }
-            if (create_email) {
-                create_email = false;
-                createEmail();
-            }
         };
         recognition.onresult = function(event) {
             var interim_transcript = '';
@@ -66,17 +57,21 @@
                     interim_transcript += event.results[i][0].transcript;
                 }
             }
-            final_transcript = capitalize(final_transcript);
             final_span.innerHTML = linebreak(final_transcript);
             interim_span.innerHTML = linebreak(interim_transcript);
-            if (final_transcript || interim_transcript) {
+
+            if (interim_transcript) {
+                console.log(interim_transcript);
+                var re = /^(click|scroll|enter)\s(.*)/i;
+                var result = re.exec(interim_transcript.trim());
+                if (result) {
+                    perform(result);
+                }
             }
+
         };
     }
-    var first_char = /\S/;
-    function capitalize(s) {
-        return s.replace(first_char, function(m) { return m.toUpperCase(); });
-    }
+
     var two_line = /\n\n/g;
     var one_line = /\n/g;
     function linebreak(s) {
@@ -109,70 +104,74 @@ $(document).ready(function() {
     var result = re.exec(potentialcommand);
     console.log(result);
  	if(result) {
-	  var verb = result[1];
-      var arg = result[2]
-
-      console.log("verb: " + verb + ", args: " + arg);
-
-      switch(verb) {
-      	case "click":
-      	  // what do we do if click?
-      	  console.log("handling click " + arg);
-
-      	  console.log($("*:contains('" + arg + "')"));
-
-      	  var stringpieces = arg.split(/\s/);
-
-      	  $("a,input,button").each(function() {
-      	    if($(this)[0].tagName == "INPUT") {
-      	        console.log($(this)[0].value);
-      	    	// look for the text in INPUT fields
-                if ($(this)[0].value == arg) {
-                    if ($(this)[0].type == "text") {
-                        $(this)[0].click();
-                        lastText = $(this)[0];
-                    }
-                    else {
-                        $(this)[0].click();
-                    }
-                }
-      	    } else  {
-      	        //console.log($(this)[0].textContent);
-                if($(this)[0].textContent == arg) {
-                    console.log("click   " + arg);
-                    $(this)[0].click();
-                }
-      	    }
-      	  });
-
-      	  break;
-      	case "scroll":
-      	  console.log("handling scroll");
-            if(arg=="up") {
-                // scroll up
-                console.log("scroll up");
-                $("html, body").animate({ scrollTop: 0 }, "slow");
-                } else if(arg=="down") {
-                console.log("scroll down");
-                window.scrollTo(0,document.body.scrollHeight);
-                 }
-      	  break;
-      	case "enter":
-      	  // what do we do on enter?
-      	  console.log("handling enter");
-      	  if (lastText) {
-              lastText.value = arg;
-          }
-      	  break;
-      	default:
-      	  alert("sorry, that is not a recognized command")
-      }
+ 	    perform(result);
  	} else {
         alert("sorry, that is not a recognized command")
     }
 
  })
 });
+
+    function perform(result) {
+        var verb = result[1];
+        var arg = result[2];
+
+        console.log("verb: " + verb + ", args: " + arg);
+
+        switch(verb) {
+            case "click":
+                // what do we do if click?
+                console.log("handling click " + arg);
+
+                console.log($("*:contains('" + arg + "')"));
+
+                var stringpieces = arg.split(/\s/);
+
+                $("a,input,button").each(function() {
+                    if($(this)[0].tagName == "INPUT") {
+                        console.log($(this)[0].value);
+                        // look for the text in INPUT fields
+                        if ($(this)[0].value == arg) {
+                            if ($(this)[0].type == "text") {
+                                $(this)[0].click();
+                                lastText = $(this)[0];
+                            }
+                            else {
+                                $(this)[0].click();
+                            }
+                        }
+                    } else  {
+                        //console.log($(this)[0].textContent);
+                        if($(this)[0].textContent == arg) {
+                            console.log("click   " + arg);
+                            $(this)[0].click();
+                        }
+                    }
+                });
+
+                break;
+            case "scroll":
+                console.log("handling scroll");
+                if(arg=="up") {
+                    // scroll up
+                    console.log("scroll up");
+                    $("html, body").animate({ scrollTop: 0 }, "slow");
+                } else if(arg=="down") {
+                    console.log("scroll down");
+                    window.scrollTo(0,document.body.scrollHeight);
+                }
+                break;
+            case "enter":
+                // what do we do on enter?
+                console.log("handling enter");
+                if (lastText) {
+                    lastText.value = arg;
+                }
+                break;
+            default:
+                alert("sorry, that is not a recognized command")
+        }
+    }
 
     function chBackcolor(color) {
         document.body.style.background = color;
@@ -206,7 +205,7 @@ $(document).ready(function() {
         <input type="text" id="command"><input type="button" value="Do something!" id="commandbutton" onclick="startButton(event);">
     </p>
 </div>
-<input type="text" value = "Enter">
+<input type="text" value = "enter">
     <p>
         <input type="button" value="cat"><br>
         <a href="https://www.google.com">Google</a><br>
