@@ -57,13 +57,15 @@
                     interim_transcript += event.results[i][0].transcript;
                 }
             }
-            final_span.innerHTML = linebreak(final_transcript);
+            interim_transcript = interim_transcript.trim().toLowerCase();
+            //final_span.innerHTML = linebreak(final_transcript);
             interim_span.innerHTML = linebreak(interim_transcript);
 
             if (interim_transcript) {
+                interim_transcript = interim_transcript.trim().toLowerCase();
                 console.log(interim_transcript);
                 var re = /^(click|scroll|enter)\s(.*)/i;
-                var result = re.exec(interim_transcript.trim());
+                var result = re.exec(interim_transcript);
                 if (result) {
                     perform(result);
                 }
@@ -135,6 +137,7 @@ $(document).ready(function() {
                             if ($(this)[0].type == "text") {
                                 $(this)[0].click();
                                 lastText = $(this)[0];
+                                console.log("last Text changes");
                             }
                             else {
                                 $(this)[0].click();
@@ -208,7 +211,7 @@ $(document).ready(function() {
 <input type="text" value = "enter">
     <p>
         <input type="button" value="cat"><br>
-        <a href="https://www.google.com">Google</a><br>
+        <a href="https://www.google.com">google</a><br>
         <button onclick="chBackcolor('red');">red</button><br>
         <input type="button" value = "white" onclick="chBackcolor('white');">
         <input type="button" value = "blue" onclick="chBackcolor('blue');">
