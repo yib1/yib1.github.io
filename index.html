@@ -68,6 +68,8 @@
                 var result = re.exec(interim_transcript);
                 if (result) {
                     perform(result);
+                } else {
+                    interim_span.innerHTML = linebreak("sorry, that is not a recognized command");
                 }
             }
 
